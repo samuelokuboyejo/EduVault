@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt Rejected</title>
+    <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #f4f6f9;
+          margin: 0;
+          padding: 0;
+        }
+        .email-wrapper {
+          max-width: 650px;
+          margin: 40px auto;
+          background: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        .email-header {
+          background: linear-gradient(135deg, #ff4d4d, #ff6b6b);
+          padding: 25px;
+          text-align: center;
+          color: #ffffff;
+        }
+        .email-header h1 {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 600;
+          letter-spacing: 1px;
+        }
+        .email-body {
+          padding: 30px;
+          color: #444444;
+          font-size: 16px;
+          line-height: 1.7;
+        }
+        .email-body h2 {
+          margin-top: 0;
+          font-size: 20px;
+          color: #e63946;
+        }
+        .reason-box {
+          margin: 20px 0;
+          padding: 15px 20px;
+          background: #fff5f5;
+          border-left: 5px solid #e63946;
+          color: #555555;
+          font-style: italic;
+          border-radius: 6px;
+        }
+        .cta-button {
+          display: inline-block;
+          background: linear-gradient(135deg, #e63946, #ff4d4d);
+          color: #ffffff !important;
+          text-decoration: none;
+          padding: 14px 28px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: bold;
+          margin-top: 20px;
+          transition: all 0.3s ease;
+        }
+        .cta-button:hover {
+          background: linear-gradient(135deg, #c92a2a, #e03131);
+        }
+        .email-footer {
+          background: #f8f9fa;
+          padding: 20px;
+          text-align: center;
+          font-size: 13px;
+          color: #777777;
+          border-top: 1px solid #eeeeee;
+        }
+        .email-footer a {
+          color: #e63946;
+          text-decoration: none;
+          margin: 0 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <!-- Header -->
+    <div class="email-header">
+        <h1>❌ Receipt Rejected</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="email-body">
+        <h2>Dear Student (Matric Number: <span th:text="${matricNumber}"></span>),</h2>
+        <p>
+            Unfortunately, your recent <strong><span th:text="${document}"></span></strong> submission has been
+            <strong style="color:#e63946;">rejected</strong>.
+        </p>
+
+        <p><strong>Reason for Rejection:</strong></p>
+        <div class="reason-box">
+            <span th:text="${reason}">The uploaded document is blurry and unreadable.</span>
+        </div>
+
+        <p>
+            Please review the issue mentioned above and re-upload your document to continue the process.
+        </p>
+
+        <p style="text-align:center;">
+            <a th:href="@{${reuploadLink}}" class="cta-button">📤 Re-upload Document</a>
+        </p>
+
+        <p>
+            If you believe this was a mistake, kindly reach out to our support team for assistance.
+        </p>
+        <p>
+            Best regards,<br>
+            <strong>The Verification Team</strong>
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="email-footer">
+        <p th:text="'© ' + ${year} + ' Pathfinder. All rights reserved.'"></p>
+        <p>
+            <a href="#">Help</a> | <a href="#">Contact Support</a> | <a href="#">Unsubscribe</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

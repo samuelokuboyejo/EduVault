@@ -39,18 +39,22 @@ public class CloudinaryService {
                 ObjectUtils.asMap(
                         "resource_type", "raw",
                         "folder", "receipts",
-                        "public_id", file.getOriginalFilename().replace(".pdf", ""),
                         "use_filename", true,
                         "unique_filename", true,
-                        "type", "upload"
+                        "type", "upload",
+                        "access_mode", "public"
                 )
         );
 
         log.debug("cloudinary pdf upload response: [{}]", uploadResult);
         JSONObject json = new JSONObject(uploadResult);
 
+        String publicId = json.getString("public_id");
+        String cloudName = this.cloudinaryClient.config.cloudName;
+        String pdfUrl = "https://res.cloudinary.com/" + cloudName + "/raw/upload/" + publicId + ".pdf";
+
         return new UploadResponse(
-                json.getString("url"),
+                pdfUrl,
                 json.getString("secure_url"),
                 json.optString("format", "pdf"),
                 json.optInt("width", 0),

@@ -55,4 +55,12 @@ public class CollegeDue {
 
     @Enumerated(EnumType.STRING)
     private Level studentLevel;
+
+    private UUID approvedBy;
+
+    private UUID rejectedBy;
+
+    private LocalDateTime approvedAt;
+
+    private LocalDateTime rejectedAt;
 }

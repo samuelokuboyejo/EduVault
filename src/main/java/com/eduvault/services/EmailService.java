@@ -1,5 +1,6 @@
 package com.eduvault.services;
 
+import com.eduvault.user.enums.AccountStatus;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -112,6 +113,7 @@ public class EmailService {
         sendHtmlEmail(to, "Password Reset Request", htmlContent);
     }
 
+    @Async
     public void sendPasswordResetSuccessEmail(String to, String name) {
         Context context = new Context();
         context.setVariable("name", name);
@@ -120,4 +122,27 @@ public class EmailService {
         sendHtmlEmail(to, "Password Reset Successful", htmlContent);
     }
 
+
+    @Async
+    public void sendAccountStatusEmail(String recipientEmail, String fullName, AccountStatus status) {
+        String templateName = switch (status) {
+            case SUSPENDED -> "account-suspended";
+            case DEACTIVATED -> "account-deactivated";
+            case ACTIVE -> "account-reactivated";
+        };
+
+        String subject = switch (status) {
+            case SUSPENDED -> "Account Suspended - EduVault";
+            case DEACTIVATED -> "Account Deactivated - EduVault";
+            case ACTIVE -> "Account Reactivated - EduVault";
+        };
+
+        Context context = new Context();
+        context.setVariable("fullName", fullName);
+
+        String htmlContent = templateEngine.process(templateName, context);
+
+        sendHtmlEmail(recipientEmail, "Account Status Update", htmlContent);
+
+    }
 }

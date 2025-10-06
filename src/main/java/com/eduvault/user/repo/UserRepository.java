@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,8 +27,12 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("update User u set u.password = ?2 where u.email = ?1")
     void updatePassword(String email, String password);
 
-    Optional<User> findByRole(UserRole userRole);
+    List<User> findByRole(UserRole userRole);
 
     List<User> findByRoleIn(List<UserRole> roles);
+
+    List<User> findByEmailIn(List<String> emails);
+
+    long countByRoleAndCreatedAtBetween(UserRole role, LocalDateTime start, LocalDateTime end);
 
 }

@@ -1,6 +1,9 @@
 package com.eduvault.services;
 
+import com.cloudinary.Cloudinary;
 import com.eduvault.dto.CourseFormResponse;
+import com.eduvault.dto.FileDownloadResponse;
+import com.eduvault.entities.CollegeDue;
 import com.eduvault.entities.CourseForm;
 import com.eduvault.repositories.CourseFormRepository;
 import com.eduvault.user.User;
@@ -15,10 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -33,6 +38,8 @@ public class CourseFormService {
     private final CourseFormRepository courseFormRepository;
     private final CloudinaryService cloudinaryService;
     private final PdfReaderService pdfReaderService;
+    private final Cloudinary cloudinary;
+
 
     public CourseFormResponse processReceipt  (MultipartFile file, String e_mail, Level studentLevel) throws IOException {
         User user = userRepository.findByEmail(e_mail).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -210,4 +217,33 @@ public class CourseFormService {
             return baos.toByteArray();
         }
     }
+
+    public FileDownloadResponse downloadReceiptByUser(String email) throws IOException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        CourseForm receipt = courseFormRepository.findByUploadedBy(user.getId())
+                .stream()
+                .max(Comparator.comparing(CourseForm::getUploadedAt))
+                .orElseThrow(() -> new EntityNotFoundException("No receipt found for this user."));
+
+        if (receipt.getPdfUrl() == null || receipt.getPdfUrl().isBlank()) {
+            throw new FileNotFoundException("No PDF found for this receipt.");
+        }
+
+        String fileUrl = receipt.getPdfUrl();
+
+        byte[] pdfBytes;
+        try (InputStream in = new URL(fileUrl).openStream()) {
+            pdfBytes = in.readAllBytes();
+        } catch (Exception e) {
+            throw new IOException("Could not download PDF from Cloudinary: " + e.getMessage(), e);
+        }
+
+        String fileName = (receipt.getName() != null ? receipt.getName().replaceAll("\\s+", "_") : "receipt")
+                + "-" + receipt.getMatricNumber() + ".pdf";
+
+        return new FileDownloadResponse(fileName, pdfBytes);
+    }
+
 }

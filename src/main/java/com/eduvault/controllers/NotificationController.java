@@ -1,12 +1,10 @@
 package com.eduvault.controllers;
 
-import com.eduvault.dto.CountResponse;
-import com.eduvault.dto.MarkAllReadResponse;
-import com.eduvault.dto.NotificationDto;
-import com.eduvault.dto.NotificationResponse;
+import com.eduvault.dto.*;
 import com.eduvault.services.NotificationService;
 import com.eduvault.user.UserInfoUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -193,6 +192,97 @@ public class NotificationController {
         String email = principal.getUsername();
         CountResponse response = notificationService.getUnreadCount(email);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Broadcast announcement to all students",
+            description = "Allows an ADMIN to send a system-wide announcement to all students."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Announcement broadcasted successfully",
+                    content = @Content(schema = @Schema(implementation = AnnouncementResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized – user must be logged in"),
+            @ApiResponse(responseCode = "403", description = "Forbidden – only ADMIN can access this endpoint")
+    })
+    @PostMapping("/broadcast/students")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AnnouncementResponse> broadcastAnnouncementToStudents(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserInfoUserDetails principal,
+            @RequestBody BroadcastRequest request) {
+
+        AnnouncementResponse response = notificationService.broadcastAnnouncementToStudents(
+                principal.getUsername(),
+                request.getTitle(),
+                request.getMessage()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Broadcast announcement to staff and admins",
+            description = "Allows an ADMIN to send a system-wide announcement to all staff and admins."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Announcement sent to staff/admins successfully",
+                    content = @Content(schema = @Schema(implementation = AnnouncementResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized – user must be logged in"),
+            @ApiResponse(responseCode = "403", description = "Forbidden – only ADMIN can access this endpoint")
+    })
+    @PostMapping("/broadcast/staff")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AnnouncementResponse> broadcastAnnouncementToAdminsAndStaff(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserInfoUserDetails principal,
+            @RequestBody BroadcastRequest request) {
+
+        AnnouncementResponse response = notificationService.broadcastAnnouncementToAdminsAndStaff(
+                principal.getUsername(),
+                request.getTitle(),
+                request.getMessage()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Send custom notification",
+            description = "Allows ADMIN or STAFF to send custom notifications to specific students or departments."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Custom notification sent successfully",
+                    content = @Content(schema = @Schema(implementation = AnnouncementResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized – user must be logged in"),
+            @ApiResponse(responseCode = "403", description = "Forbidden – only ADMIN or STAFF can access this endpoint")
+    })
+    @PostMapping("/send")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    public ResponseEntity<AnnouncementResponse> sendCustom(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserInfoUserDetails principal,
+            @RequestBody CustomNotificationRequest request) {
+
+        AnnouncementResponse response = notificationService.sendCustomNotification(
+                principal.getUsername(),
+                request.getRecipients(),
+                request.getTitle(),
+                request.getMessage()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Get all sent notifications",
+            description = "Allows an ADMIN to view all notifications they have previously sent."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sent notifications retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = NotificationDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized – user must be logged in"),
+            @ApiResponse(responseCode = "403", description = "Forbidden – only ADMIN can access this endpoint")
+    })
+    @GetMapping("/sent")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<NotificationDto>> getSentNotifications(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserInfoUserDetails principal,
+            Pageable pageable) {
+        return ResponseEntity.ok(notificationService.getNotificationsSentBy(principal.getUsername(), pageable));
     }
 }
 

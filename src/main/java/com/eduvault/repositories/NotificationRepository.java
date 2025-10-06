@@ -1,6 +1,7 @@
 package com.eduvault.repositories;
 
 import com.eduvault.entities.Notification;
+import com.eduvault.user.enums.NotificationScope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,8 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     Page<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
     List<Notification> findByUserIdAndReadStatusFalse(UUID userId);
     Long countByUserIdAndReadStatusFalse(UUID userId);
+
+    Page<Notification> findBySenderIdOrderByCreatedAtDesc(UUID senderId, Pageable pageable);
+
+    Page<Notification> findByScope(NotificationScope scope, Pageable pageable);
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Suspended</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 30px; }
+        .header { text-align: center; color: #dc3545; }
+        .footer { font-size: 12px; color: #999; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="header">Account Suspended</h2>
+    <p>Dear <b th:text="${fullName}"></b>,</p>
+    <p>Your account has been <b style="color: #dc3545;">suspended</b> due to policy or administrative reasons.</p>
+    <p>If you believe this was a mistake, please contact our support team.</p>
+    <p>— The EduVault Team</p>
+    <hr/>
+    <div class="footer">
+        This is an automated message. Please do not reply to this email.
+    </div>
+</div>
+</body>
+</html>

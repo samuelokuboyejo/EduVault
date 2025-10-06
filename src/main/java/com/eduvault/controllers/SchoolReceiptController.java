@@ -1,5 +1,6 @@
 package com.eduvault.controllers;
 
+import com.eduvault.dto.FileDownloadResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.eduvault.auth.utils.LevelRequest;
 import com.eduvault.dto.CollegeDueResponse;
@@ -104,6 +105,22 @@ public class SchoolReceiptController {
         }
         String email = principal.getUsername();
         return ResponseEntity.ok(schoolFeeReceiptService.getAllReceiptsByLevelByUser(studentLevel, email));
+    }
+
+    @GetMapping("/me/download")
+    public ResponseEntity<byte[]> downloadUserReceipt(@AuthenticationPrincipal UserInfoUserDetails principal)
+            throws IOException {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = principal.getUsername();
+        FileDownloadResponse file = schoolFeeReceiptService.downloadReceiptByUser(email);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(file.getFileContent());
     }
 
 

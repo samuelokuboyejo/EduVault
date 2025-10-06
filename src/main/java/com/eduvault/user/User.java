@@ -1,6 +1,7 @@
 package com.eduvault.user;
 
 
+import com.eduvault.user.enums.AccountStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.eduvault.auth.utils.RefreshToken;
 import com.eduvault.user.enums.UserRole;
@@ -64,6 +65,9 @@ public class User implements UserDetails {
     private LocalDateTime lastLogin;
 
     private String authProvider;
+
+    @Enumerated(EnumType.STRING)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
 
     @Override

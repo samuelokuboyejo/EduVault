@@ -4,9 +4,12 @@ import com.eduvault.auth.service.AuthService;
 
 import com.eduvault.auth.utils.DeleteResponse;
 import com.eduvault.auth.utils.UserRoleProfileResponse;
+import com.eduvault.dto.AccountStatusResponse;
 import com.eduvault.dto.InvitationRequest;
 import com.eduvault.dto.InvitationResponse;
+import com.eduvault.entities.RoleChangeLog;
 import com.eduvault.services.InvitationService;
+import com.eduvault.user.enums.AccountStatus;
 import com.eduvault.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -91,5 +95,26 @@ public class AdminController {
     public ResponseEntity<List<UserRoleProfileResponse> > getAllPrivilegedUsers() {
         List<UserRoleProfileResponse> response = userService.getAllPrivilegedUsers();
         return ResponseEntity.ok().body(response);
+    }
+
+    @Operation(summary = "View all role change logs", description = "Lists all recorded user role changes with admin, old/new role, and timestamps.")
+    @ApiResponse(responseCode = "200", description = "List of all role changes")
+    @GetMapping("/audit/roles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RoleChangeLog>> getAllRoleChangeLogs() {
+        return ResponseEntity.ok(authService.getAllRoleChangeLogs());
+    }
+
+    @PutMapping("/account/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Change account status",
+            description = "Deactivate, suspend, or reactivate a user account by email."
+    )
+    @ApiResponse(responseCode = "200", description = "Account status updated successfully")
+    public ResponseEntity<AccountStatusResponse> changeAccountStatus(@RequestParam String email,
+                                                                     @RequestParam AccountStatus status) {
+        AccountStatusResponse response = userService.changeAccountStatus(email, status);
+        return ResponseEntity.ok(response);
     }
 }

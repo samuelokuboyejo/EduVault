@@ -1,10 +1,14 @@
 package com.eduvault.user.service;
 
+import com.eduvault.auth.utils.AuthResponse;
 import com.eduvault.auth.utils.UserRoleProfileResponse;
+import com.eduvault.dto.AccountStatusResponse;
 import com.eduvault.exceptions.UserNotFoundException;
+import com.eduvault.services.EmailService;
 import com.eduvault.user.User;
 import com.eduvault.user.dto.UpdateProfileRequest;
 import com.eduvault.user.dto.UserProfileDto;
+import com.eduvault.user.enums.AccountStatus;
 import com.eduvault.user.enums.UserRole;
 import com.eduvault.user.repo.UserRepository;
 import com.eduvault.user.utils.UploadResponse;
@@ -24,6 +28,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
 
 
     public UserProfileDto getProfile(String email) {
@@ -81,5 +86,21 @@ public class UserService {
                         .build())
 
                 .toList();
+    }
+
+    public AccountStatusResponse changeAccountStatus(String email, AccountStatus status) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        user.setAccountStatus(status);
+        userRepository.save(user);
+        emailService.sendAccountStatusEmail(
+                user.getEmail(),
+                user.getFirstName() + " " + user.getLastName(),
+                status
+        );
+        return AccountStatusResponse.builder()
+                .message( "User account " + status.name().toLowerCase() + " successfully.")
+                .build();
     }
 }

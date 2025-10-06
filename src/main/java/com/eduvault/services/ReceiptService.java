@@ -36,26 +36,32 @@ public class ReceiptService {
 
 
 
-    public ReceiptResponse approveSchoolFeeReceipt(UUID receiptId){
+    public ReceiptResponse approveSchoolFeeReceipt(UUID receiptId, String email){
         SchoolFeeReceipt receipt = schoolFeeReceiptRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.APPROVED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = schoolFeeReceiptService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your School Fee Receipt has been received and approved by the school");
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setApprovedBy(staff.getId());
+        receipt.setApprovedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your School Fee Receipt for "+ receipt.getStudentLevel() + " has been received and approved by the school");
         return ReceiptResponse.builder()
                 .message("Receipt Approved Successfully!")
                 .build();
 
     }
 
-    public ReceiptResponse rejectSchoolFeeReceipt(UUID receiptId, String reason){
+    public ReceiptResponse rejectSchoolFeeReceipt(UUID receiptId, String reason, String email){
         SchoolFeeReceipt receipt = schoolFeeReceiptRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.REJECTED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = schoolFeeReceiptService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your School Fee Receipt has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your School Fee Receipt for "+ receipt.getStudentLevel() + "  has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setRejectedBy(staff.getId());
+        receipt.setRejectedAt(LocalDateTime.now());
         String reuploadLink = "go to the app";
         String document = "School Fee Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
@@ -66,26 +72,32 @@ public class ReceiptService {
     }
 
 
-    public ReceiptResponse approveSchoolFeeInvoice(UUID receiptId){
+    public ReceiptResponse approveSchoolFeeInvoice(UUID receiptId, String email){
         SchoolFeeInvoice receipt = schoolFeeInvoiceRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.APPROVED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = schoolFeeInvoiceService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your School Fee Invoice has been received and approved by the school");
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setApprovedBy(staff.getId());
+        receipt.setApprovedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your School Fee Invoice  for "+ receipt.getStudentLevel() + " has been received and approved by the school");
         return ReceiptResponse.builder()
                 .message("Receipt Approved Successfully!")
                 .build();
 
     }
 
-    public ReceiptResponse rejectSchoolFeeInvoice(UUID receiptId, String reason){
+    public ReceiptResponse rejectSchoolFeeInvoice(UUID receiptId, String reason, String email){
         SchoolFeeInvoice receipt = schoolFeeInvoiceRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.REJECTED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = schoolFeeInvoiceService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your School Fee Invoice has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setRejectedBy(staff.getId());
+        receipt.setRejectedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your School Fee Invoice for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
         String reuploadLink = "go to the app";
         String document = "School Fee Invoice";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
@@ -95,26 +107,32 @@ public class ReceiptService {
 
     }
 
-    public ReceiptResponse approveRemitaSchoolFeeReceipt(UUID receiptId){
+    public ReceiptResponse approveRemitaSchoolFeeReceipt(UUID receiptId, String email){
         RemitaSchoolFeeReceipt receipt = remitaSchoolFeeReceiptRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.APPROVED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = remitaSchoolFeeReceiptService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your Remita School Fee Receipt has been received and approved by the school");
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setApprovedBy(staff.getId());
+        receipt.setApprovedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your Remita School Fee Receipt for "+ receipt.getStudentLevel() + " has been received and approved by the school");
         return ReceiptResponse.builder()
                 .message("Receipt Approved Successfully!")
                 .build();
 
     }
 
-    public ReceiptResponse rejectRemitaSchoolFeeReceipt(UUID receiptId, String reason){
+    public ReceiptResponse rejectRemitaSchoolFeeReceipt(UUID receiptId, String reason, String email){
         RemitaSchoolFeeReceipt receipt = remitaSchoolFeeReceiptRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.REJECTED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = remitaSchoolFeeReceiptService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Remita School Fee Receipt has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setRejectedBy(staff.getId());
+        receipt.setRejectedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Remita School Fee Receipt for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
         String reuploadLink = "go to the app";
         String document = "Remita School Fee Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
@@ -124,26 +142,32 @@ public class ReceiptService {
 
     }
 
-    public ReceiptResponse approveDeptDueReceipt(UUID receiptId){
+    public ReceiptResponse approveDeptDueReceipt(UUID receiptId, String email){
         DeptDue receipt = deptDueRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.APPROVED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = deptDueService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your Dept Due Receipt has been received and approved by the school");
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setApprovedBy(staff.getId());
+        receipt.setApprovedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your Dept Due Receipt for "+ receipt.getStudentLevel() + " has been received and approved by the school");
         return ReceiptResponse.builder()
                 .message("Receipt Approved Successfully!")
                 .build();
 
     }
 
-    public ReceiptResponse rejectDeptDueReceipt(UUID receiptId, String reason){
+    public ReceiptResponse rejectDeptDueReceipt(UUID receiptId, String reason, String email){
         DeptDue receipt = deptDueRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.REJECTED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = deptDueService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Dept Due Receipt has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Dept Due Receipt for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setRejectedBy(staff.getId());
+        receipt.setRejectedAt(LocalDateTime.now());
         String reuploadLink = "go to the app";
         String document = "Dept Due Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
@@ -153,26 +177,32 @@ public class ReceiptService {
 
     }
 
-    public ReceiptResponse approveCollegeDueReceipt(UUID receiptId){
+    public ReceiptResponse approveCollegeDueReceipt(UUID receiptId, String email){
         CollegeDue receipt = collegeDueRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.APPROVED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = collegeDueService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your College Due Receipt has been received and approved by the school");
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setApprovedBy(staff.getId());
+        receipt.setApprovedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your College Due Receipt for "+ receipt.getStudentLevel() + "  has been received and approved by the school");
         return ReceiptResponse.builder()
                 .message("Receipt Approved Successfully!")
                 .build();
 
     }
 
-    public ReceiptResponse rejectCollegeDueReceipt(UUID receiptId, String reason){
+    public ReceiptResponse rejectCollegeDueReceipt(UUID receiptId, String reason, String email){
         CollegeDue receipt = collegeDueRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.REJECTED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = collegeDueService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your College Due Receipt has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setRejectedBy(staff.getId());
+        receipt.setRejectedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your College Due Receipt for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
         String reuploadLink = "go to the app";
         String document = "College Due Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
@@ -182,26 +212,32 @@ public class ReceiptService {
 
     }
 
-    public ReceiptResponse approveCourseForm(UUID receiptId){
+    public ReceiptResponse approveCourseForm(UUID receiptId, String email){
         CourseForm receipt = courseFormRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.APPROVED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = courseFormService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your Course Form has been received and approved by the school");
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setApprovedBy(staff.getId());
+        receipt.setApprovedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_APPROVED, "Your Course Form for "+ receipt.getStudentLevel() + " has been received and approved by the school");
         return ReceiptResponse.builder()
                 .message("Receipt Approved Successfully!")
                 .build();
 
     }
 
-    public ReceiptResponse rejectCourseForm(UUID receiptId, String reason){
+    public ReceiptResponse rejectCourseForm(UUID receiptId, String reason, String email){
         CourseForm receipt = courseFormRepository.findById(receiptId)  .orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setState(Status.REJECTED);
         receipt.setUpdatedAt(LocalDateTime.now());
         UUID userId = courseFormService.getUploadedBy(receiptId);
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
-        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Course Form has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
+        User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
+        receipt.setRejectedBy(staff.getId());
+        receipt.setRejectedAt(LocalDateTime.now());
+        notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Course Form for "+ receipt.getStudentLevel() + "  has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
         String reuploadLink = "go to the app";
         String document = "Course Form";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);

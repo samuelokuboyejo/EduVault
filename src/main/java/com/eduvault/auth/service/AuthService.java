@@ -1,9 +1,13 @@
 package com.eduvault.auth.service;
 
 import com.eduvault.auth.utils.*;
+import com.eduvault.dto.RoleRequest;
 import com.eduvault.entities.Invitation;
+import com.eduvault.entities.RoleChangeLog;
 import com.eduvault.repositories.InvitationRepository;
+import com.eduvault.repositories.RoleChangeLogRepository;
 import com.eduvault.user.User;
+import com.eduvault.user.enums.AccountStatus;
 import com.eduvault.user.enums.UserRole;
 import com.eduvault.user.repo.UserRepository;
 import com.eduvault.user.service.CloudinaryService;
@@ -11,6 +15,7 @@ import com.eduvault.user.utils.UploadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +36,7 @@ public class AuthService {
     private final GoogleAuthService googleAuthService;
     private final CloudinaryService cloudinaryService;
     private final InvitationRepository invitationRepository;
+    private final RoleChangeLogRepository roleChangeLogRepository;
 
 
     public AuthResponse registerStudent(StudentRegisterRequest request){
@@ -67,6 +74,10 @@ public class AuthService {
                 .or(() -> userRepository.findByMatricNumber(loginRequest.getIdentifier()))
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
 
+        if (user.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new RuntimeException("Your account is " + user.getAccountStatus().name().toLowerCase() + ".");
+        }
+
         user.setLastLogin(LocalDateTime.now());
 
         var accessToken = jwtService.generateToken(user);
@@ -93,6 +104,10 @@ public class AuthService {
         String picture = (String) payload.get("picture");
 
         var user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found"));
+        if (user.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new RuntimeException("Your account is " + user.getAccountStatus().name().toLowerCase() + ".");
+        }
+
         user.setLastLogin(LocalDateTime.now());
 
         String accessToken = jwtService.generateToken(user);
@@ -133,6 +148,36 @@ public class AuthService {
                 .refreshToken(refreshToken.getRefreshToken())
                 .build();
 
+    }
+
+    public AuthResponse changeRole(RoleRequest request){
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(()->new UsernameNotFoundException("User not found"));
+        UserRole oldRole = user.getRole();
+        user.setRole(request.getRole());
+        userRepository.save(user);
+
+        String adminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        RoleChangeLog log = RoleChangeLog.builder()
+                .adminEmail(adminEmail)
+                .userEmail(user.getEmail())
+                .oldRole(oldRole)
+                .newRole(request.getRole())
+                .changedAt(LocalDateTime.now())
+                .build();
+        roleChangeLogRepository.save(log);
+
+        var accessToken = jwtService.generateToken(user);
+        var refreshToken = refreshTokenService.createRefreshToken(request.getEmail());
+
+        return AuthResponse.builder()
+
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getRefreshToken())
+                .build();
+    }
+
+    public List<RoleChangeLog> getAllRoleChangeLogs(){
+        return roleChangeLogRepository.findAll();
     }
 
     public DeleteResponse deleteUser(String email){

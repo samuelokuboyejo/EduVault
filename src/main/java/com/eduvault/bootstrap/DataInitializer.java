@@ -6,13 +6,16 @@ import com.eduvault.user.User;
 import com.eduvault.user.enums.UserRole;
 import com.eduvault.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
@@ -35,7 +38,7 @@ public class DataInitializer {
                 userRepository.save(admin);
                 var accessToken = jwtService.generateToken(admin);
                 var refreshToken = refreshTokenService.createRefreshToken(admin.getEmail());
-                System.out.println("✅ Default admin account created! " + "/n accessToken: " + accessToken + "/n refreshToken: " + refreshToken);
+                log.debug("✅ Default admin account created! " + "/n accessToken: " + accessToken + "/n refreshToken: " + refreshToken);
             }
         };
     }

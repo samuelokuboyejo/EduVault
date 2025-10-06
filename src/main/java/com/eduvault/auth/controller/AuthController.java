@@ -1,5 +1,6 @@
 package com.eduvault.auth.controller;
 
+import com.eduvault.dto.RoleRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.eduvault.auth.service.AuthService;
 import com.eduvault.auth.service.ForgotPasswordService;
@@ -10,6 +11,7 @@ import com.eduvault.user.utils.ResetLinkResponse;
 import com.eduvault.user.utils.ResetPasswordResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -144,6 +147,45 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestParam String token, @RequestBody ResetPasswordPasswordRequest request) {
         ResetPasswordResponse response = forgotPasswordService.resetPassword(token, request.getNewPassword());
+        return ResponseEntity.ok(response);
+    }
+
+
+    @Operation(
+            summary = "Change user role",
+            description = """
+                    Allows an ADMIN to change the role of a user (e.g., from STUDENT to STAFF or ADMIN).
+                    A new access and refresh token pair will be generated for the updated role.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Payload containing user's email and the new role",
+                    content = @Content(
+                            schema = @Schema(implementation = RoleRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Change Role Example",
+                                    summary = "Example request to change a user's role",
+                                    value = """
+                                            {
+                                              "email": "john.doe@university.edu",
+                                              "role": "STAFF"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User role updated successfully",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized — user must be logged in"),
+            @ApiResponse(responseCode = "403", description = "Forbidden — only ADMIN can change user roles"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PostMapping("/change-role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AuthResponse> changeRole(@RequestBody RoleRequest request) {
+        AuthResponse response = authService.changeRole(request);
         return ResponseEntity.ok(response);
     }
 }

@@ -9,6 +9,7 @@ import com.eduvault.user.repo.UserRepository;
 import com.eduvault.utils.NotificationUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ReceiptService {
+
+   @Value( "${app.reupload.link}")
+   private String link;
 
     private final DeptDueService deptDueService;
     private final CollegeDueService collegeDueService;
@@ -62,7 +66,7 @@ public class ReceiptService {
         User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setRejectedBy(staff.getId());
         receipt.setRejectedAt(LocalDateTime.now());
-        String reuploadLink = "go to the app";
+        String reuploadLink = link;
         String document = "School Fee Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
         return ReceiptResponse.builder()
@@ -98,7 +102,7 @@ public class ReceiptService {
         receipt.setRejectedBy(staff.getId());
         receipt.setRejectedAt(LocalDateTime.now());
         notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your School Fee Invoice for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
-        String reuploadLink = "go to the app";
+        String reuploadLink = link;
         String document = "School Fee Invoice";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
         return ReceiptResponse.builder()
@@ -133,7 +137,7 @@ public class ReceiptService {
         receipt.setRejectedBy(staff.getId());
         receipt.setRejectedAt(LocalDateTime.now());
         notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Remita School Fee Receipt for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
-        String reuploadLink = "go to the app";
+        String reuploadLink = link;
         String document = "Remita School Fee Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
         return ReceiptResponse.builder()
@@ -168,7 +172,7 @@ public class ReceiptService {
         User staff = userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("Receipt not found"));
         receipt.setRejectedBy(staff.getId());
         receipt.setRejectedAt(LocalDateTime.now());
-        String reuploadLink = "go to the app";
+        String reuploadLink = link;
         String document = "Dept Due Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
         return ReceiptResponse.builder()
@@ -203,7 +207,7 @@ public class ReceiptService {
         receipt.setRejectedBy(staff.getId());
         receipt.setRejectedAt(LocalDateTime.now());
         notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your College Due Receipt for "+ receipt.getStudentLevel() + " has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
-        String reuploadLink = "go to the app";
+        String reuploadLink = link;
         String document = "College Due Receipt";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
         return ReceiptResponse.builder()
@@ -238,7 +242,7 @@ public class ReceiptService {
         receipt.setRejectedBy(staff.getId());
         receipt.setRejectedAt(LocalDateTime.now());
         notificationService.createNotification(user.getEmail(), NotificationUtils.DOCUMENT_REJECTED, "Your Course Form for "+ receipt.getStudentLevel() + "  has been rejected, something seems to be wrong with the receipt you uploaded; "+ reason);
-        String reuploadLink = "go to the app";
+        String reuploadLink = link;
         String document = "Course Form";
         emailService.sendReceiptRejectionEmail(user.getEmail(), reason, reuploadLink, user.getMatricNumber(), document);
         return ReceiptResponse.builder()

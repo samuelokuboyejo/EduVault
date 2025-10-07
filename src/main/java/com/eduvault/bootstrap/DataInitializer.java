@@ -3,6 +3,7 @@ package com.eduvault.bootstrap;
 import com.eduvault.auth.service.JwtService;
 import com.eduvault.auth.service.RefreshTokenService;
 import com.eduvault.user.User;
+import com.eduvault.user.enums.AccountStatus;
 import com.eduvault.user.enums.UserRole;
 import com.eduvault.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class DataInitializer {
                         .password(encoder.encode("SuperSecurePassword123"))
                         .role(UserRole.ADMIN)
                         .createdAt(LocalDateTime.now())
+                        .accountStatus(AccountStatus.ACTIVE)
                         .build();
                 userRepository.save(admin);
                 var accessToken = jwtService.generateToken(admin);

@@ -25,8 +25,8 @@ public class ForgotPasswordService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Value("${app.reset.password.link}")
+    private String link;
 
     public ResetLinkResponse sendResetLink(String email) {
         User user = userRepository.findByEmail(email)
@@ -57,7 +57,7 @@ public class ForgotPasswordService {
 
 
 
-        String resetLink = baseUrl + "auth/reset-password?token=" + token;
+        String resetLink = link + token;
         emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         return ResetLinkResponse.builder()
                 .resetLink(resetLink)

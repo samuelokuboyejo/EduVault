@@ -18,8 +18,8 @@ public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final EmailService emailService;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Value("${app.invitation.link}")
+    private String link;
 
     public InvitationResponse createInvitation(InvitationRequest request) {
         var invitation = Invitation.builder()
@@ -30,7 +30,7 @@ public class InvitationService {
                 .build();
 
         Invitation savedInvitation = invitationRepository.save(invitation);
-        String invitationLink = baseUrl + "auth/register?token=" + savedInvitation.getToken();
+        String invitationLink = link + savedInvitation.getToken();
 
         emailService.sendInvitationEmail(savedInvitation.getEmail(), "Registration Invitation", invitationLink);
 

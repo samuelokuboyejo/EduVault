@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Year;
 
 @Service
@@ -22,6 +24,12 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    @Value("${app.mail.from.name}")
+    private String fromName;
 
 
     @Async
@@ -43,6 +51,7 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(fromEmail, fromName);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
@@ -58,7 +67,7 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
+            helper.setFrom(fromEmail, fromName);
             helper.setTo(to);
             helper.setSubject(subject);
             Context context = new Context();
@@ -89,7 +98,7 @@ public class EmailService {
             context.setVariable("year", Year.now().getValue());
 
             String htmlContent = templateEngine.process("receipt-rejection-email", context);
-
+            helper.setFrom(fromEmail, fromName);
             helper.setTo(to);
             helper.setSubject("Receipt Rejected ❌");
             helper.setText(htmlContent, true);
@@ -100,6 +109,8 @@ public class EmailService {
 
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send rejection email", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 

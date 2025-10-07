@@ -51,6 +51,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(UserRole.STUDENT)
+                .accountStatus(AccountStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
         User savedUser = userRepository.save(user);
@@ -132,6 +133,7 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .role(invitation.getInvitedRole())
+                .accountStatus(AccountStatus.ACTIVE)
                 .imageUrl(uploadResponse.getSecureUrl())
                 .createdAt(LocalDateTime.now())
                 .build();
